@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 from pyemd import emd
 from hausdorff import hausdorff
-from scipy.stats import entropy, norm, uniform
+from scipy.stats import entropy, norm, uniform, multivariate_normal
 
 
 # Number of samples
@@ -12,6 +12,15 @@ N = 100
 # Dimension of samples
 n = 1
 
+
+# multivariate normal#
+x,y = np.mgrid[-1:1:0.01, -1:1:0.1]
+pos = np.empty(x.shape + (2,))
+pos[:,:,0] = x
+pos[:,:,1] = y
+rv = multivariate_normal([0.5, -0.2], [[2.0, 0.3], [0.3, 0.5]])
+plt.contour(x,y,rv.pdf(pos))
+plt.show()
 
 # pdf1 = norm(10, 5)
 pdf2 = norm(20, 5)
@@ -45,6 +54,7 @@ emd12 = emd(points1, points2, dist12)
 emd13 = emd(points1, points3, dist13)
 emd23 = emd(points2, points3, dist23)
 
+print("EMD")
 print(emd12, emd13, emd23)
 
 # Hausdorff
@@ -52,9 +62,8 @@ haus12 = hausdorff(points1.reshape((points1.shape[0], 1)), points2.reshape((poin
 haus13 = hausdorff(points1.reshape((points1.shape[0], 1)), points3.reshape((points3.shape[0], 1)))
 haus23 = hausdorff(points2.reshape((points2.shape[0], 1)), points3.reshape((points3.shape[0], 1)))
 
+print("Hausdorff")
 print(haus12, haus13, haus23)
-
-
 
 # KL Divergence
 x = np.linspace(1, 150, 150)
@@ -62,6 +71,7 @@ kl12 = entropy(pdf1.pdf(x), pdf2.pdf(x))
 kl13 = entropy(pdf1.pdf(x), pdf3.pdf(x))
 kl23 = entropy(pdf2.pdf(x), pdf3.pdf(x))
 
+print("KL Div")
 print(kl12, kl13, kl23)
 
 # L1 Norm
