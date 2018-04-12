@@ -1,0 +1,18 @@
+* Intro to belief space planning
+ - Information gathering example
+ - Collision probability example
+ - Minimization of uncertainty
+* Intro to RRT/Sampling approaches
+* Distance functions
+* Graphs examples for distance functions 1D, 2D
+* Non Deterministic Case
+* Simulation results
+* Modeling challenges
+* Tie in to class
+ - P Space, I Space, Y Space
+* Downsides
+ - Gaussian land, Computer based representation of a pdf
+ - High dimensionality
+ - Steering function between belief
+ - Space filling properties are gone
+ - Reachability in belief space
