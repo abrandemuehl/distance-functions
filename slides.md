@@ -1,15 +1,12 @@
 ---
-geometry: margin=2cm
-title: Mitra Research Group Meeting
-author: Alli Nilles 
+title: The Importance of a Suitable Distance Function in Belief Space Planning
+author: Alli Nilles, Adrian Brandemuehl
 date: \today
-bibliography: /home/alli/common/refs.bib
 csl: ./ieee.csl
-date: October 9, 2017
+date: April 28, 2018
 header-includes:
     -   \usetheme[block=fill]{metropolis}
     -   \usepackage{ifthen}
-    -   \usepackage{jeffe}
     -   \usepackage{tikz}
     -   \usetikzlibrary{arrows}
     -   \usepackage[font=small]{subcaption}
@@ -21,135 +18,114 @@ Outline
 =======
 
 
-> -   **Bouncing robots:** discovering (and proving) dynamical properties of simple robot motion models
->     -   find minimal control and hardware that gives desired properties: periodic motion or
->         other attractors, coverage
->     -   SpaceEx project, possible future directions         
-> -   **Improv:** high-level language for control of mobile robots
->     -   small domain-specific language, compiles to ROS
->     -   Future work: type-level checks and/or explicit model checking (with
->         DryVR?)?
-> -   **Aggregate robot systems:** dynamics of local interactions toward minimal control
-> -   **Automatic robot design** and automation of Robot Design Game
+*   **Belief Space** introduction to planning and advantages
+    -   Intro
+    -   Advantages via Examples
+    -   RRT
+*   **Distance Functions** for sampling planners
+    -   L1
+    -   KL Divergence
+    -   Hausdorff
+    -   Earth Movers Distance (EMD)
+*   **Analysis** 
+    -   Results
+    -   Back to basics (Nondeterministic formulation)
+    -   Downsides
 
 
-General Approach to Robot Decisionmaking
-================================
+Introduction to Belief Space Planning
+=====================================
 
-> - focus on information spaces: space of all histories of sensor readings and actions
-    taken
-> - can reduce to different space (ex: only keep track of one bit: robot on wall,
-    or not on wall)
-> - can encode dynamical information explicity (equations) or implicitly (if robot goes
-    forward forever, it will hit something)
-> - can create filters, planners over information spaces (good for when we don't
-    know, or don't need to know, physical state space)
-> - **task specific** design: how to specify tasks?
+* State -> Belief
+* A belief is a pdf over the possible (not necessarily reachable) physical states 
+* Beliefs can be arbitrary pdf's/pmf's
+* Size is doubly exponential in the number of state space dimensions
 
+Belief Space Advantages through Examples
+========================================
 
-Mobile Robots
-=============
+* If you plan in the space of beliefs, you can control the variance of your belief
+  - Information gathering, bounded collision probability
 
-> - many mobile robot tasks are actually properties of the path the robot takes
-    through space
-    - coverage, environmental monitoring, patrolling, navigation
-> - many simple models of mobile robot motion
-> - which ones have nice dynamical properties that we can get "for free"
-    (without a lot of feedback control)?
+Belief Space Example: Information Gathering
+===========================================
 
+![Given a region with available localization, the robot can plan to reduce variance by entering the measurement area [^1]](./figures/information-gathering.png)
 
-Blind, Bouncing Robots
-======================
+[^1]: [@NickRoy], Bry & Roy ICRA 2011
 
-Model the robot as a point moving **in straight lines** in the plane, "bouncing" off the boundary
-at a **fixed angle** $\theta$ from the normal:
+RRT in Belief Space
+===================
 
 
-![A point robot moving in the plane. The top row shows bounces at zero degrees
-from the normal. The second row shows bounces at 50 degrees clockwise from
-normal. The third row shows the same angle but with a "monotonicity" property
-enforced.](../figures/bounce_examples_w_monotone.pdf)
 
 
-Trapping or Coverage Properties
-===============================
-
-
-![In this environment, bouncing at the normal, the robot will become trapped
-in the area between the purple lines.](../figures/triangle_trap.jpg)
-
-
-Implementation
-==============
-
-
-> - Assume we know environment exactly
-> - Can implement on a roomba with bump sensor and IR prox detector [^2]
-> - "Collisions" can be virtual - for example, robot w/ camera stops when it is collinear
-    with two landmarks, and rotates until one landmark is at a certain heading
-> - Also useful model of very small "robots" or microorganisms [^5], or robots in
-    low-bandwith environments
-
-[^2]: [@LewOKa13], Lewis & O'Kane IJRR 2013
-[^5]: [@microorganism2017], Thiffeault et. al. Physica D Nonlinear Phenomena
-2017
-
-
-Discovery Through Simulation
+Distance Functions for Sampling Planners
 ============================
 
 
--   Haskell with *Diagrams* library [@yorgey2012monoids]
--   fixed-angle bouncing, specular bouncing, add noise
--   render diagrams from simulations automatically [^7]
+* Need distance functions that work in belief space
+	- Must take into account the pdf of the belief as well as the physical state
 
-[^7]: \url{https://github.com/alexandroid000/bounce}
+L1 Distance
+===========
+
 
 \centering
+$$D_{L1}(b, b') = \int_{x \in \mathbb{X}} | b(x) - b'(x) | dx$$
 
-![](../figures/pent_05rad.pdf){width=3cm}\
+
+KL-Divergence
+=============
 
 
-Simulation Results
+* Information theoretic distance between pdfs
+
+\centering
+$$D_{KL}(b, b') = \int_{x \in \mathbb{X}} b(x)(\ln b(x) - \ln b'(x)) dx$$
+
+
+
+
+Hausdorff Distance
 ==================
 
 
-\begin{figure}[tp]
-\begin{subfigure}{.37\textwidth}
 \centering
-\includegraphics[width=\linewidth]{../figures/pent_05rad.pdf}
-\end{subfigure}%
-\begin{subfigure}{0.37\textwidth}
-\includegraphics[width=\linewidth]{../figures/pent_1rad.pdf}
-\end{subfigure}
-\begin{subfigure}{0.37\textwidth}
-\includegraphics[width=\linewidth]{../figures/pent_165rad.pdf}
-\end{subfigure}%
-\begin{subfigure}{0.37\textwidth}
-\includegraphics[width=\linewidth]{../figures/pent_3rad.pdf}
-\end{subfigure}
-\end{figure}
+
+$$D_{H}(b, b') = \max\Big\{d_{H}(b,b'), d_{H}(b', b)\Big\}$$
+$$d_{H}(b, b') = \max_{x \in support(b)}\bigg\{ \min_{x' \in support(b')} \{ d_{\mathbb{X}}(x, x') \}\bigg\}$$
+
+* $d_{\mathbb{X}}$ is the state space distance
+* Does not take into account the distribution of states
 
 
+Earth Mover's Distance (EMD)
+============================
 
-584 Project - Reachability in 2D with SpaceEx
-=============================================
+\centering
+
+$$D_{w}(b, b') = \inf_{f} \bigg\{   \bigg\}$$
 
 
-\centering code generation for given polygon and bounce angle
+Spaces in Belief Space Planning
+===============================
+
+* P Space: Same as in deterministic case
+* Y Space: Same as Probabilistic case
+* I Space: P$\times \mathbb{P}$ ($\mathbb{P}$ is the space of all distributions)
 
 
-\begin{tikzpicture}[->,>=stealth',auto,node distance=2.5cm,
-  thick,main node/.style={circle,draw,minimum size = 1.7cm, font=\scriptsize}]
-\node[main node] (x0)   [align=center] {$\dot{x} = v_x$\\$\dot{y} =v_y$};
+Belief Space Disadvantages
+=============
 
-\path[]
-    (x0) edge [loop above,thick] node {$e_1$} (x0)
-    (x0) edge [loop right,thick] node {$e_2$} (x0)
-    (x0) edge [loop left,thick] node {$e_3$} (x0)
-    (x0) edge [loop below,thick] node {$e_4$} (x0);
-
-\end{tikzpicture}
+* Stay in Gaussian land for the most part
+  - Few good ways to model pdf's
+  - Everyone uses Gaussian distribution for beliefs
+* Dimensionality is huge
+* Steering function not studied between beliefs
+* No longer have space filling properties
+* Reachability expensive to consider in planning
 
 
 

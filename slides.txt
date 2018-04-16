@@ -9,7 +9,9 @@
 * Simulation results
 * Modeling challenges
 * Tie in to class
- - P Space, I Space, Y Space
+ - P Space - Unchanged
+ - I Space - P x fancy{P} (fancy{P} space of all pdfs)
+ - Y Space - Y (probabilistic Y)
 * Downsides
  - Gaussian land, Computer based representation of a pdf
  - High dimensionality
