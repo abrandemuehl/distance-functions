@@ -36,16 +36,20 @@ Outline
 Introduction to Belief Space Planning
 =====================================
 
-* State -> Belief
-* A belief is a pdf over the possible (not necessarily reachable) physical states 
-* Beliefs can be arbitrary pdf's/pmf's
-* Size is doubly exponential in the number of state space dimensions
+> * A belief is a pdf over the possible (not necessarily reachable) physical states 
+> * Goal is to generate a strategy (sequence of actions, or mapping from beliefs
+to best actions) that takes agent from start states (set of beliefs) to goal
+states (set of beliefs)
+> * "Size is doubly exponential in the number of state space dimensions"
+>       * If we restrict the space of pdfs to those with finite parameterizations
+>       * Otherwise is an infinite cardinality space of possible pdfs
 
 Belief Space Advantages through Examples
 ========================================
 
 * If you plan in the space of beliefs, you can control the variance of your belief
-  - Information gathering, bounded collision probability
+    - leads to information gathering as a strategy in partially observable spaces
+    - can set bounds on collision probability as input to planner
 
 Belief Space Example: Information Gathering
 ===========================================
@@ -54,11 +58,49 @@ Belief Space Example: Information Gathering
 
 [^1]: [@NickRoy], Bry & Roy ICRA 2011
 
+Open-loop planning in belief space
+===================
+
+Paper terminology: **NOMDP** (Non-Observable Markov Decision Process)
+
+**Non-Observable:** no sensor readings (open loop plan)
+
+**Markov Decision Process:** next belief depends only on current belief and action
+(this update function is given)
+
+. . .
+
+How to tame high dimensionality of belief space?
+
+. . .
+
+Random sampling!
+
+
 RRT in Belief Space
 ===================
 
 
+```python
+G = {V -> {b_0}, E -> 0}
 
+for N iterations do
+    # choose belief in tree closest to random belief
+    b_selected = SelectNode(B, V, d_n)
+```
+. . .
+```python
+    # apply a random control for a random time
+    b_new = Random_Prop(b_select, U, Tmax)
+```
+. . .
+```python
+    # optimize wrt cost function
+    if NodeLocallyBest(b_new, S, d_s):
+        V <- V U {b_new}
+        E <- E U {b_select -> b_new}
+        Prune_Tree(b_new, V, E, d_s)
+```
 
 Distance Functions for Sampling Planners
 ============================
