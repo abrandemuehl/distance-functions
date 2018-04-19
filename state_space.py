@@ -20,6 +20,7 @@ delta_t = 1
 T = 100
 
 
+
 # n is the inward edge normal (in degrees 0 to 2pi)
 def PerformBounce(s,bp,n,strategy):
     # Random bounce
@@ -67,6 +68,14 @@ def main():
     state = (200.0, 200.0)
     v = 1.0
     theta = 0.0
+
+    disc_s = discretize_P(poly, 10)
+
+    for row in disc_s:
+        for pt in row:
+            (x,y) = pt
+            int_pt = (int(x), int(y)) # pygame is stupid
+            pygame.draw.circle(screen, white, int_pt, 1)
 
 
     for i in range(0, T, delta_t):
