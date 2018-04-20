@@ -3,6 +3,7 @@ title: The Importance of a Suitable Distance Function in Belief Space Planning
 author: Alli Nilles, Adrian Brandemuehl
 date: \today
 csl: ./ieee.csl
+bibliography: ./slides.bib
 date: April 28, 2018
 header-includes:
     -   \usetheme[block=fill]{metropolis}
@@ -56,7 +57,7 @@ Belief Space Example: Information Gathering
 
 ![Given a region with available localization, the robot can plan to reduce variance by entering the measurement area [^1]](./figures/information-gathering.png)
 
-[^1]: [@NickRoy], Bry & Roy ICRA 2011
+[^1]: [@bry2011rapidly], Bry & Roy ICRA 2011
 
 Open-loop planning in belief space
 ===================
