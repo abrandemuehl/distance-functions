@@ -7,6 +7,7 @@ from pyemd import emd
 from scipy.spatial.distance import directed_hausdorff
 from scipy.stats import entropy, norm, uniform, multivariate_normal
 from geom_utils import IsInPoly
+from scipy.linalg import eig
 
 # Number of samples
 N = 100
@@ -42,15 +43,23 @@ def discretize_P(poly,res):
         disc_p.append(row)
     return disc_p
 
+def mk_2d_gauss(mean, cov11, cov12, cov22):
+    # multivariate normal
+    x,y = np.mgrid[-1:1:0.01, -1:1:0.1]
+    pos = np.empty(x.shape + (2,))
+    pos[:,:,0] = x
+    pos[:,:,1] = y
+    rv = multivariate_normal(mean, cov)
+    return (x,y,rv.pdf(pos))
 
-# multivariate normal
-x,y = np.mgrid[-1:1:0.01, -1:1:0.1]
-pos = np.empty(x.shape + (2,))
-pos[:,:,0] = x
-pos[:,:,1] = y
-rv = multivariate_normal([0.5, -0.2], [[2.0, 0.3], [0.3, 0.5]])
-plt.contour(x,y,rv.pdf(pos))
-plt.show()
+def mk_confidence_ellipse(mean, cov):
+    evals, evecs = eig(cov)
+    return evals, evecs
+
+
+
+mean = [0.0, 0.0]
+cov = [[2.0, 0.3], [0.3, 0.5]]
 
 # pdf1 = norm(10, 5)
 pdf2 = norm(20, 5)
@@ -88,9 +97,9 @@ print(emd12, emd13, emd23)
 (haus12,i,j) = directed_hausdorff(points1.reshape((points1.shape[0], 1)), points2.reshape((points2.shape[0], 1)))
 (haus13,i,j) = directed_hausdorff(points1.reshape((points1.shape[0], 1)), points3.reshape((points3.shape[0], 1)))
 (haus23,i,j) = directed_hausdorff(points2.reshape((points2.shape[0], 1)), points3.reshape((points3.shape[0], 1)))
-haus12_undir = hausdorff(points1.reshape((points1.shape[0], 1)), points2.reshape((points2.shape[0], 1)))
-haus13_undir = hausdorff(points1.reshape((points1.shape[0], 1)), points3.reshape((points3.shape[0], 1)))
-haus23_undir = hausdorff(points2.reshape((points2.shape[0], 1)), points3.reshape((points3.shape[0], 1)))
+# haus12_undir = hausdorff(points1.reshape((points1.shape[0], 1)), points2.reshape((points2.shape[0], 1)))
+# haus13_undir = hausdorff(points1.reshape((points1.shape[0], 1)), points3.reshape((points3.shape[0], 1)))
+# haus23_undir = hausdorff(points2.reshape((points2.shape[0], 1)), points3.reshape((points3.shape[0], 1)))
 
 print("Hausdorff")
 print(haus12, haus13, haus23)

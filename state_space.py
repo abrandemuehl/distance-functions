@@ -7,19 +7,19 @@ import sys, random, math, pygame
 from pygame.locals import *
 from math import sqrt,cos,sin,atan2,pi
 from time import sleep
+from gen_beliefs import discretize_P
 
 #constants
-XDIM = 500
-YDIM = 500
+XDIM = 600
+YDIM = 600
 WINSIZE = [XDIM, YDIM]
 EPSILON = 1.0
 MAXDIST = 10000000.0
 # This sets the boundary
-boundary = [(500,500),(0,500),(0,0),(500,0)]
+boundary = [(550,550),(50,550),(50,50),(550,50)]
+obstacle = [(200,400),(200,300),(300,300),(300,400)]
 delta_t = 1
 T = 100
-
-
 
 # n is the inward edge normal (in degrees 0 to 2pi)
 def PerformBounce(s,bp,n,strategy):
@@ -64,8 +64,9 @@ def main():
     pint = (0.0,0.0)
 
     poly = boundary
+    obs = obstacle
     # Set the initial robot state (x,y)
-    state = (200.0, 200.0)
+    state = (60.0, 60.0)
     v = 1.0
     theta = 0.0
 
@@ -84,6 +85,7 @@ def main():
 
 
         pygame.draw.polygon(screen,white,poly,5)
+        pygame.draw.polygon(screen,white,obstacle)
         pygame.draw.line(screen,green,new_state,state,3)
         pygame.display.update()
 #        print "state:",state
