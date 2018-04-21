@@ -37,13 +37,13 @@ Outline
 Introduction to Belief Space Planning
 =====================================
 
-> * A belief is a pdf over the possible (not necessarily reachable) physical states 
-> * Goal is to generate a strategy (sequence of actions, or mapping from beliefs
+* A belief is a probability distribution over the possible (not necessarily reachable) physical states 
+* Goal is to generate a strategy (mapping from beliefs
 to best actions) that takes agent from start states (set of beliefs) to goal
 states (set of beliefs)
-> * "Size is doubly exponential in the number of state space dimensions"
->       * If we restrict the space of pdfs to those with finite parameterizations
->       * Otherwise is an infinite cardinality space of possible pdfs
+* "Size is doubly exponential in the number of state space dimensions"
+      * If we restrict the space of pdfs to those with finite parameterizations
+      * Otherwise is an infinite cardinality space of possible pdfs
 
 Belief Space Advantages through Examples
 ========================================
@@ -103,12 +103,19 @@ for N iterations do
         Prune_Tree(b_new, V, E, d_s)
 ```
 
+
+
 Distance Functions for Sampling Planners
 ============================
 
+\centering
 
-* Need distance functions that work in belief space
-	- Must take into account the pdf of the belief as well as the physical state
+What makes a good distance function in belief space?
+
+. . .
+
+1. How similar are the shapes of the belief distributions?
+2. How far apart are the beliefs in the underlying state space?
 
 L1 Distance
 ===========
@@ -158,14 +165,29 @@ Spaces in Belief Space Planning
 * Y Space: Same as Probabilistic case
 * I Space: P$\times \mathbb{P}$ ($\mathbb{P}$ is the space of all distributions)
 
+Updating Beliefs
+================
 
-Belief Space Disadvantages
+* Need efficient update of state estimation
+    - Most choose Gaussian distribution for beliefs; can use Kalman filter for
+      belief updates
+
+\begin{align*}
+p(s_t | u_{1:t}, y_{1:t}) &= \frac{1}{Z} p(y_t | s_t) \int_S p(s_t | u_t,
+s_{t-1}) p(s_{t-1}) ds_{t-1} \\
+X_t (\eta_t) &= h^{-1}(y_t) \cap X_{t}(\eta_{t-1}, u_{t-1}) 
+\end{align*}
+
+But in certain robotic tasks (eg: grasping), Gaussians are not necessarily a natural
+representation, and can lead to "arbitrarily poor belief state estimates"[^2]
+
+[^2]: Platt, Kaelbling, Lozano-Perez, Tedrake ICRA 2012 \cite{platt2012non}
+
+Belief Space - Hard Modelling Choices
 =============
 
-* Stay in Gaussian land for the most part
-  - Few good ways to model pdf's
-  - Everyone uses Gaussian distribution for beliefs
-* Dimensionality is huge
+ 
+* Dimensionality is huge: how to sample 
 * Steering function not studied between beliefs
 * No longer have space filling properties
 * Reachability expensive to consider in planning
