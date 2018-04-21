@@ -45,12 +45,22 @@ states (set of beliefs)
       * If we restrict the space of pdfs to those with finite parameterizations
       * Otherwise is an infinite cardinality space of possible pdfs
 
-Belief Space Advantages through Examples
-========================================
+Belief Space Planning 
+=====================
 
-* If you plan in the space of beliefs, you can control the variance of your belief
-    - leads to information gathering as a strategy in partially observable spaces
-    - can set bounds on collision probability as input to planner
+If you plan in the space of beliefs, you can reduce the variance of your belief
+by:
+
+- choosing actions which decrease uncertainty
+- going to areas where sensors have high expected information gain
+
+General strategy for belief space planning:
+
+- inputs to planner:
+    -  dynamics model (stochastic noise from known distribution)
+    -  sensor model (stochastic noise from known distribution)
+    -  bounds on collision probability
+    -  confidence in goal state
 
 Belief Space Example: Information Gathering
 ===========================================
@@ -186,12 +196,13 @@ representation, and can lead to "arbitrarily poor belief state estimates"[^2]
 Belief Space - Hard Modelling Choices
 =============
 
- 
-* Dimensionality is huge: how to sample 
-* Steering function not studied between beliefs
+* Dimensionality is huge: how to sample and plan efficiently?
+* Hard to find steering functions: given two beliefs, what control inputs go
+  from one to the other?
 * No longer have space filling properties
 * Reachability expensive to consider in planning
-
+* Often assumes collisions are undesirable (how to model gaussian belief while
+  in contact?)
 
 
 References
