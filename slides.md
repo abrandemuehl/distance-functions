@@ -82,28 +82,16 @@ Common Assumptions / Modeling Choices
     -  confidence in goal state
 
 
-Another Example
-===============
 
-![Given a region with available localization, the robot can plan to reduce variance by entering the measurement area [^1]](./figures/information-gathering.png)
-
-[^1]: [@bry2011rapidly], Bry & Roy ICRA 2011
-
-Open-loop planning in belief space
+Planning in belief space
 ===================
 
-Paper terminology: **NOMDP** (Non-Observable Markov Decision Process)
 
-**Non-Observable:** no sensor readings (open loop plan)
+**NOMDP** (Non-Observable Markov Decision Process)
 
-**Markov Decision Process:** next belief depends only on current belief and action
-(this update function is given)
-
-. . .
+**POMDP** (Partially-Observable Markov Decision Process)
 
 How to tame high dimensionality of belief space?
-
-. . .
 
 Random sampling!
 
@@ -117,7 +105,8 @@ G = {V -> {b_0}, E -> 0}
 
 for N iterations do
     # choose belief in tree closest to random belief
-    b_selected = SelectNode(B, V, d_n)
+    b_random = SampleBelief(B)
+    b_selected = SelectNode(B, V, b_random, d_n)
 ```
 . . .
 ```python
@@ -127,17 +116,18 @@ for N iterations do
 . . .
 ```python
     # optimize wrt cost function
-    if NodeLocallyBest(b_new, S, d_s):
-        V <- V U {b_new}
-        E <- E U {b_select -> b_new}
-        Prune_Tree(b_new, V, E, d_s)
+    Prune_Tree(b_new, V, E, d_s)
 ```
 
 POMDP Formulation
 =================
 
 
-
+-   include sensor readings
+-   use off-the-shelf POMDP solver (Monte Carlo Value Iteration) and modify to
+    use different distance functions
+-   use distance function to discard samples if they are too close to existing
+    nodes
 
 Distance Functions for Sampling Planners
 ============================
@@ -167,7 +157,6 @@ KL-Divergence
 \centering
 $$D_{KL}(b, b') = \int_{x \in \mathbb{X}} b(x)(\ln b(x) - \ln b'(x)) dx$$
 
-* Information theoretic distance between pdfs
 
 
 Hausdorff Distance
@@ -195,29 +184,68 @@ Earth Mover's Distance (EMD)
   & b = \int_{x'} f(x,x') \partial x', b'(x') = \int_{x}f(x,x')\partial x\bigg\} \nonumber
 \end{align}
 
-* $d_{\mathbb{X}}$ is the state space distance
 
+Can also be written as:
+$$ EMD(b, b') = \inf_{f} \mathbb{E} [ d_{\mathbb{X}}(x, x') ] $$
+
+where $f$ is space of all joint distributions with marginals $b$ and $b'$.
+
+Finding $f$ is a linear programming problem - more expensive than other distance
+functions.
 
 Distance Function Demo
 ======================
 
-![](distances.pdf)
+\centering
+
+![](distances.pdf)\
+
+
+
+Results
+=======
+
+\centering
+
+![](belief-008.png){width=6cm}\ ![](belief-009.png){width=6cm}\
+
+
+![](belief-010.png){width=6cm}\ ![](belief-011.png){width=6cm}\
+
+
+Results
+=======
+
+
+![](belief-012.png){width=6cm}\ ![](belief-013.png){width=6cm}\
+
+
+![](belief-014.png){width=6cm}\ ![](belief-015.png){width=6cm}\
+
+
+
+Connections to Class Topics
+===========================
+
+
+
 
 Spaces in Belief Space Planning
 ===============================
 
-* P Space: Same as in deterministic case
-* Y Space: Same as Probabilistic case
+* P Space: metric representation of physical world
+* Y Space: set of all possible sensor readings
 * I Space: $\mathbb{P}$ (the space of all distributions over P)
 
 
-Simplification to Non-Deterministic
+Comparison with Nondeterministic Planning
 ===================================
-* P Space: Same as in Deterministic case
-* Y Space: Same as Deterministic case
-* I Space: $Pow(P)$
 
-\em{You cannot simulate Non-Deterministic case with Uniform distributions when dealing with distance functions}
+I Space: $Pow(P)$
+
+
+Is belief space planning with uniform distributions equivalent to nondet I-space
+planning?
 
 
 Updating Beliefs
@@ -231,21 +259,31 @@ s_{t-1}) p(s_{t-1}) ds_{t-1} \\
 X_t (\eta_t) &= h^{-1}(y_t) \cap X_{t}(\eta_{t-1}, u_{t-1}) 
 \end{align*}
 
-But in certain robotic tasks (eg: grasping), Gaussians are not necessarily a natural
-representation, and can lead to "arbitrarily poor belief state estimates"[^2]
-
-[^2]: Platt, Kaelbling, Lozano-Perez, Tedrake ICRA 2012 \cite{platt2012non}
 
 Belief Space - Hard Modeling Choices
 =============
 
+* In certain robotic tasks (eg: grasping), Gaussians are not necessarily a natural
+  representation, and can lead to "arbitrarily poor belief state estimates"[^2]
 * Hard to find steering functions: given two beliefs, what control inputs go
   from one to the other?
-* No longer have space filling properties
-* Reachability expensive to consider in planning
-* Often assumes collisions are undesirable (how to model gaussian belief while
+    - *Sparse Methods for Efficient Asymptotically Optimal Kinodynamic
+      Planning*, Li, Littlefield, Bekris WAFR 2014
+* Belief space planning often assumes collisions are undesirable (how to model gaussian belief while
   in contact?)
 
+[^2]: Platt, Kaelbling, Lozano-Perez, Tedrake ICRA 2012 [@platt2012non]
+
+
+Discussion Questions
+====================
+
+> -  Is there one best distance function for every situation?
+> -  How important is it to have real-time computation?
+> -  When should we worry about discretization errors and approximations?
+> -  When to use particle-based representations?
+> -  When to use nondeterministic representation vs probabilistic representation?
+> -  How could we represent compliant actions (wall collisions, grasping, etc)
 
 References
 ==========
