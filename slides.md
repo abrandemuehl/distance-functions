@@ -164,12 +164,10 @@ KL-Divergence
 =============
 
 
-* Information theoretic distance between pdfs
-
 \centering
 $$D_{KL}(b, b') = \int_{x \in \mathbb{X}} b(x)(\ln b(x) - \ln b'(x)) dx$$
 
-
+* Information theoretic distance between pdfs
 
 
 Hausdorff Distance
@@ -190,18 +188,37 @@ Earth Mover's Distance (EMD)
 
 \centering
 
-$$ 
-D_{w}(b, b') = \inf_{f} \bigg\{ \int_{x \in \mathbb{X}} 
-\int_{x' \in \mathbb{X}} d_{\mathbb{X}}(x,x') f(x,x') \partial x \partial x' \bigg\}
-$$
 
+\begin{align}
+  & D_{w}(b, b') = \inf_{f} \bigg\{ \int_{x \in \mathbb{X}} \int_{x \in \mathbb{X}} 
+    d_{\mathbb{X}} (x, x') f(x,x')\partial x \partial x'  \bigg |  \nonumber \\
+  & b = \int_{x'} f(x,x') \partial x', b'(x') = \int_{x}f(x,x')\partial x\bigg\} \nonumber
+\end{align}
+
+* $d_{\mathbb{X}}$ is the state space distance
+
+
+Distance Function Demo
+======================
+
+![](distances.pdf)
 
 Spaces in Belief Space Planning
 ===============================
 
 * P Space: Same as in deterministic case
 * Y Space: Same as Probabilistic case
-* I Space: P$\times \mathbb{P}$ ($\mathbb{P}$ is the space of all distributions)
+* I Space: $\mathbb{P}$ (the space of all distributions over P)
+
+
+Simplification to Non-Deterministic
+===================================
+* P Space: Same as in Deterministic case
+* Y Space: Same as Deterministic case
+* I Space: $Pow(P)$
+
+\em{You cannot simulate Non-Deterministic case with Uniform distributions when dealing with distance functions}
+
 
 Updating Beliefs
 ================
@@ -219,7 +236,7 @@ representation, and can lead to "arbitrarily poor belief state estimates"[^2]
 
 [^2]: Platt, Kaelbling, Lozano-Perez, Tedrake ICRA 2012 \cite{platt2012non}
 
-Belief Space - Hard Modelling Choices
+Belief Space - Hard Modeling Choices
 =============
 
 * Hard to find steering functions: given two beliefs, what control inputs go
