@@ -19,51 +19,71 @@ Outline
 =======
 
 
-*   **Belief Space** introduction to planning and advantages
-    -   Intro
-    -   Advantages via Examples
-    -   RRT
-*   **Distance Functions** for sampling planners
+*   **Belief Space**
+    -   Modelling choices
+    -   Planning in belief space: RRT & POMDP solvers
+*   **Distance Functions** in belief space 
     -   L1
     -   KL Divergence
     -   Hausdorff
     -   Earth Movers Distance (EMD)
 *   **Analysis** 
     -   Results
-    -   Back to basics (Nondeterministic formulation)
-    -   Downsides
+    -   Comparison with I-space representation
+    -   Discussion of advantages & disadvantages
 
 
 Introduction to Belief Space Planning
 =====================================
 
-* A belief is a probability distribution over the possible (not necessarily reachable) physical states 
-* Goal is to generate a strategy (mapping from beliefs
-to best actions) that takes agent from start states (set of beliefs) to goal
-states (set of beliefs)
-* "Size is doubly exponential in the number of state space dimensions"
-      * If we restrict the space of pdfs to those with finite parameterizations
-      * Otherwise is an infinite cardinality space of possible pdfs
+> * A *belief* is a probability distribution over the state space
+> * *Belief space* is a space of all such beliefs
+> * How big is the belief space?
 
 Belief Space Planning 
 =====================
 
+**Plan:** a mapping from beliefs to best actions that
+takes agent from start states (set of beliefs) to goal states (set of
+beliefs)
+    
 If you plan in the space of beliefs, you can reduce the variance of your belief
 by:
 
 - choosing actions which decrease uncertainty
 - going to areas where sensors have high expected information gain
 
-General strategy for belief space planning:
+Belief Space Example: Information Gathering
+===========================================
 
-- inputs to planner:
+\centering
+
+![](bel1.png){width=6cm}\
+
+![](bel2.png){width=6cm}\
+
+[^3]
+
+[^3]: Computational Robotics group (Ron Alterovitz), UNC Chapel Hill
+
+
+Common Assumptions / Modeling Choices
+=====================================
+
+-   High dimensionality $\to$ sampling
+-   Need efficient update of state estimation $p(x|u,y)$
+    - Most choose Gaussian distribution for beliefs; can use Kalman filter for
+        belief updates
+
+- Inputs to planner:
     -  dynamics model (stochastic noise from known distribution)
     -  sensor model (stochastic noise from known distribution)
     -  bounds on collision probability
     -  confidence in goal state
 
-Belief Space Example: Information Gathering
-===========================================
+
+Another Example
+===============
 
 ![Given a region with available localization, the robot can plan to reduce variance by entering the measurement area [^1]](./figures/information-gathering.png)
 
@@ -113,6 +133,10 @@ for N iterations do
         Prune_Tree(b_new, V, E, d_s)
 ```
 
+POMDP Formulation
+=================
+
+
 
 
 Distance Functions for Sampling Planners
@@ -126,6 +150,7 @@ What makes a good distance function in belief space?
 
 1. How similar are the shapes of the belief distributions?
 2. How far apart are the beliefs in the underlying state space?
+
 
 L1 Distance
 ===========
@@ -165,7 +190,10 @@ Earth Mover's Distance (EMD)
 
 \centering
 
-$$D_{w}(b, b') = \inf_{f} \bigg\{   \bigg\}$$
+$$ 
+D_{w}(b, b') = \inf_{f} \bigg\{ \int_{x \in \mathbb{X}} 
+\int_{x' \in \mathbb{X}} d_{\mathbb{X}}(x,x') f(x,x') \partial x \partial x' \bigg\}
+$$
 
 
 Spaces in Belief Space Planning
@@ -178,9 +206,7 @@ Spaces in Belief Space Planning
 Updating Beliefs
 ================
 
-* Need efficient update of state estimation
-    - Most choose Gaussian distribution for beliefs; can use Kalman filter for
-      belief updates
+Need to perform Bayes' update efficiently:
 
 \begin{align*}
 p(s_t | u_{1:t}, y_{1:t}) &= \frac{1}{Z} p(y_t | s_t) \int_S p(s_t | u_t,
@@ -196,7 +222,6 @@ representation, and can lead to "arbitrarily poor belief state estimates"[^2]
 Belief Space - Hard Modelling Choices
 =============
 
-* Dimensionality is huge: how to sample and plan efficiently?
 * Hard to find steering functions: given two beliefs, what control inputs go
   from one to the other?
 * No longer have space filling properties
