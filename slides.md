@@ -16,7 +16,7 @@ header-includes:
 
 
 Outline
-=======
+-------
 
 
 *   **Belief Space**
@@ -30,18 +30,18 @@ Outline
 *   **Analysis** 
     -   Results
     -   Comparison with I-space representation
-    -   Discussion of advantages & disadvantages
+    -   Discussion
 
 
 Introduction to Belief Space Planning
-=====================================
+-------------------------------------
 
 > * A *belief* is a probability distribution over the state space
 > * *Belief space* is a space of all such beliefs
 > * How big is the belief space?
 
 Belief Space Planning 
-=====================
+---------------------
 
 **Plan:** a mapping from beliefs to best actions that
 takes agent from start states (set of beliefs) to goal states (set of
@@ -54,7 +54,7 @@ by:
 - going to areas where sensors have high expected information gain
 
 Belief Space Example: Information Gathering
-===========================================
+-------------------------------------------
 
 \centering
 
@@ -68,23 +68,24 @@ Belief Space Example: Information Gathering
 
 
 Common Assumptions / Modeling Choices
-=====================================
+-------------------------------------
 
--   High dimensionality $\to$ sampling
 -   Need efficient update of state estimation $p(x|u,y)$
     - Most choose Gaussian distribution for beliefs; can use Kalman filter for
         belief updates
 
 - Inputs to planner:
+    -  map of environment
+    -  belief space (how to update and sample beliefs)
     -  dynamics model (stochastic noise from known distribution)
     -  sensor model (stochastic noise from known distribution)
-    -  bounds on collision probability
-    -  confidence in goal state
+    -  initial beliefs (how to choose?) and goal beliefs
+    -  (possibly) bounds on collision probability
 
 
 
 Planning in belief space
-===================
+-------------------
 
 
 **NOMDP** (Non-Observable Markov Decision Process)
@@ -97,7 +98,7 @@ Random sampling!
 
 
 RRT in Belief Space
-===================
+-------------------
 
 
 ```python
@@ -120,17 +121,21 @@ for N iterations do
 ```
 
 POMDP Formulation
-=================
+-----------------
 
+How to incorporate sensing?
 
--   include sensor readings
 -   use off-the-shelf POMDP solver (Monte Carlo Value Iteration) and modify to
     use different distance functions
 -   use distance function to discard samples if they are too close to existing
     nodes
 
+How Important is Distance?
+==========================
+
+
 Distance Functions for Sampling Planners
-============================
+----------------------------
 
 \centering
 
@@ -143,7 +148,7 @@ What makes a good distance function in belief space?
 
 
 L1 Distance
-===========
+-----------
 
 
 \centering
@@ -151,7 +156,7 @@ $$D_{L1}(b, b') = \int_{x \in \mathbb{X}} | b(x) - b'(x) | dx$$
 
 
 KL-Divergence
-=============
+-------------
 
 
 \centering
@@ -160,7 +165,7 @@ $$D_{KL}(b, b') = \int_{x \in \mathbb{X}} b(x)(\ln b(x) - \ln b'(x)) dx$$
 
 
 Hausdorff Distance
-==================
+------------------
 
 
 \centering
@@ -173,28 +178,27 @@ $$d_{H}(b, b') = \max_{x \in support(b)}\bigg\{ \min_{x' \in support(b')} \{ d_{
 
 
 Earth Mover's Distance (EMD)
-============================
+----------------------------
 
 \centering
 
+$$ EMD(b, b') = \inf_{f} \mathbb{E} [ d_{\mathbb{X}}(x, x') ] $$
 
+where $f$ is chosen from all joint distributions with marginals $b$ and $b'$.
+
+Written in paper as:
 \begin{align}
-  & D_{w}(b, b') = \inf_{f} \bigg\{ \int_{x \in \mathbb{X}} \int_{x \in \mathbb{X}} 
+  D_{w}(b, b') = \inf_{f} \bigg\{ & \int_{x \in \mathbb{X}} \int_{x \in \mathbb{X}} 
     d_{\mathbb{X}} (x, x') f(x,x')\partial x \partial x'  \bigg |  \nonumber \\
   & b = \int_{x'} f(x,x') \partial x', b'(x') = \int_{x}f(x,x')\partial x\bigg\} \nonumber
 \end{align}
 
 
-Can also be written as:
-$$ EMD(b, b') = \inf_{f} \mathbb{E} [ d_{\mathbb{X}}(x, x') ] $$
-
-where $f$ is space of all joint distributions with marginals $b$ and $b'$.
-
-Finding $f$ is a linear programming problem - more expensive than other distance
-functions.
+Finding $f$ is a linear programming problem - relatively expensive, compared to
+other distance functions.
 
 Distance Function Demo
-======================
+----------------------
 
 \centering
 
@@ -203,7 +207,7 @@ Distance Function Demo
 
 
 Results
-=======
+-------
 
 \centering
 
@@ -214,7 +218,7 @@ Results
 
 
 Results
-=======
+-------
 
 
 ![](belief-012.png){width=6cm}\ ![](belief-013.png){width=6cm}\
@@ -228,20 +232,22 @@ Connections to Class Topics
 ===========================
 
 
-
-
 Spaces in Belief Space Planning
-===============================
+-------------------------------
 
 * P Space: metric representation of physical world
 * Y Space: set of all possible sensor readings
+* U Space: action set, probabilistic state transitions
 * I Space: $\mathbb{P}$ (the space of all distributions over P)
 
 
 Comparison with Nondeterministic Planning
-===================================
+-----------------------------------
 
-I Space: $Pow(P)$
+* P Space: same
+* Y Space: same, but with set preimages instead of posteriors
+* U Space: same, but with state transitions on sets
+* I Space: $Pow(P)$
 
 
 Is belief space planning with uniform distributions equivalent to nondet I-space
@@ -249,7 +255,7 @@ planning?
 
 
 Updating Beliefs
-================
+----------------
 
 Need to perform Bayes' update efficiently:
 
@@ -261,32 +267,32 @@ X_t (\eta_t) &= h^{-1}(y_t) \cap X_{t}(\eta_{t-1}, u_{t-1})
 
 
 Belief Space - Hard Modeling Choices
-=============
+-------------
 
-* In certain robotic tasks (eg: grasping), Gaussians are not necessarily a natural
-  representation, and can lead to "arbitrarily poor belief state estimates"[^2]
 * Hard to find steering functions: given two beliefs, what control inputs go
   from one to the other?
     - *Sparse Methods for Efficient Asymptotically Optimal Kinodynamic
       Planning*, Li, Littlefield, Bekris WAFR 2014
-* Belief space planning often assumes collisions are undesirable (how to model gaussian belief while
-  in contact?)
+* In certain robotic tasks (eg: grasping), Gaussians are not necessarily a natural
+  representation, and can lead to "arbitrarily poor belief state estimates"[^2]
+* Belief space planning often assumes collisions are undesirable, but they can
+  be very useful for decreasing uncertainty
 
 [^2]: Platt, Kaelbling, Lozano-Perez, Tedrake ICRA 2012 [@platt2012non]
 
 
 Discussion Questions
-====================
+--------------------
 
 > -  Is there one best distance function for every situation?
 > -  How important is it to have real-time computation?
 > -  When should we worry about discretization errors and approximations?
 > -  When to use particle-based representations?
 > -  When to use nondeterministic representation vs probabilistic representation?
-> -  How could we represent compliant actions (wall collisions, grasping, etc)
+> -  How could we represent compliant actions (wall collisions, grasping, etc)?
 
 References
-==========
+----------
 
 \tiny
 
